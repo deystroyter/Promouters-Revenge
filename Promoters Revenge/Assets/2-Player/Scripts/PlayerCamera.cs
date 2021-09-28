@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PlayerLook : MonoBehaviour
+public class PlayerCamera : MonoBehaviour
 {
     //Player GameObject
     public Transform target;
@@ -9,6 +9,9 @@ public class PlayerLook : MonoBehaviour
 
     public float ScrollSensivity = 1;
     public float ZoomSpeed = 9f;
+
+    [Range(0.001f, 1.000f)]
+    public float SmoothTime = 0.4f;
 
     [Header("Y Axis")]
     [Range(1, 30)]
@@ -23,6 +26,8 @@ public class PlayerLook : MonoBehaviour
     public float MinDistanceZ = 1f;
     public float MaxDistanceZ = 20f;
 
+    private Vector3 cameraVelocity = Vector3.zero;
+
     private void Start()
     {
         transform.LookAt(target);
@@ -32,17 +37,30 @@ public class PlayerLook : MonoBehaviour
     private void LateUpdate()
     {
         //Sphere Effect to Zoom
-        transform.LookAt(target);
+        //transform.LookAt(target);
+
+        //#region OldCameraFollow XZ
+
+        //if (CameraDistanceZ >= MinDistanceZ && CameraDistanceZ <= MaxDistanceZ)
+        //{
+        //    transform.position = Vector3.Slerp(transform.position, new Vector3(target.position.x, transform.position.y, target.position.z - CameraDistanceZ), 0.2f);
+        //}
+        //else
+        //{
+        //    transform.position = Vector3.Slerp(transform.position, new Vector3(target.position.x, transform.position.y, target.position.z - CameraDistanceZ), 0.2f);
+        //}
+
+        //#endregion OldCameraFollow XZ
 
         #region CameraFollow XZ
 
         if (CameraDistanceZ >= MinDistanceZ && CameraDistanceZ <= MaxDistanceZ)
         {
-            transform.position = Vector3.Slerp(transform.position, new Vector3(target.position.x, transform.position.y, target.position.z - CameraDistanceZ), 0.2f);
+            transform.position = Vector3.SmoothDamp(transform.position, new Vector3(target.position.x, transform.position.y, target.position.z - CameraDistanceZ), ref cameraVelocity, SmoothTime);
         }
         else
         {
-            transform.position = Vector3.Slerp(transform.position, new Vector3(target.position.x, transform.position.y, target.position.z - CameraDistanceZ), 0.2f);
+            transform.position = Vector3.SmoothDamp(transform.position, new Vector3(target.position.x, transform.position.y, target.position.z - CameraDistanceZ), ref cameraVelocity, SmoothTime);
         }
 
         #endregion CameraFollow XZ
@@ -61,7 +79,7 @@ public class PlayerLook : MonoBehaviour
                 if (CameraDistanceY < MinDistanceY) CameraDistanceY = MinDistanceY;
                 if (CameraDistanceY > MaxDistanceY) CameraDistanceY = MaxDistanceY;
 
-                transform.position = Vector3.Slerp(transform.position, new Vector3(target.position.x, target.position.y + CameraDistanceY, transform.position.z), 1f);
+                transform.position = Vector3.SmoothDamp(transform.position, new Vector3(target.position.x, target.position.y + CameraDistanceY, transform.position.z), ref cameraVelocity, SmoothTime);
                 return;
             }
             //Z Axis
@@ -69,16 +87,18 @@ public class PlayerLook : MonoBehaviour
             if (CameraDistanceZ < MinDistanceZ) CameraDistanceZ = MinDistanceZ;
             if (CameraDistanceZ > MaxDistanceZ) CameraDistanceZ = MaxDistanceZ;
 
-            transform.position = Vector3.Slerp(transform.position, new Vector3(target.position.x, transform.position.y, target.position.z - CameraDistanceZ), 1f);
+            transform.position = Vector3.SmoothDamp(transform.position, new Vector3(target.position.x, transform.position.y, target.position.z - CameraDistanceZ), ref cameraVelocity, SmoothTime);
         }
 
         #endregion CameraMove
+
+        //TO FIX:
 
         #region CameraEffects
 
         if (Input.GetKeyDown(KeyCode.E))
         {
-            transform.position = Vector3.Slerp(transform.position, transform.position + transform.forward.normalized * 30, 0.1f);
+            transform.position = Vector3.Slerp(transform.position, transform.position + transform.forward.normalized * 30, 0.2f);
         }
         if (Input.GetKeyUp(KeyCode.E))
         {
