@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml.Serialization;
@@ -5,25 +6,31 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager Instance;
+    private static GameManager _instance;
 
-    public int Score;
-    public int LifeScore;
 
     protected void Awake()
     {
         MakeSingleton();
     }
 
+    protected void Start()
+    {
+    }
+
+    protected void Update()
+    {
+    }
+
     private void MakeSingleton()
     {
-        if (Instance != null)
+        if (_instance != null)
         {
             Destroy(gameObject);
         }
         else
         {
-            Instance = this;
+            _instance = this;
             DontDestroyOnLoad(gameObject);
         }
     }

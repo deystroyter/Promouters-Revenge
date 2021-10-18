@@ -16,55 +16,55 @@ namespace Assets.Scripts
 
 
         [Header("Visual Effects")]
-        [SerializeField] private float _bulletLifeTime = 5f;
+        [SerializeField] private float _maxLifeTime = 5f;
 
-        [SerializeField] private ushort _collisionsLife = 5;
+        [SerializeField] private ushort _maxCollisions = 5;
 
         [SerializeField] [Range(2, 100)] private ushort _fadeStepsCount = 20;
 
         [SerializeField] [Range(0.01f, 0.99f)] private float _percentOfLifeFade = 0.60f;
 
 
-        private float _curBulletLifeTime; // сколько сейчас осталось снаряду
-        private ushort _curCollisions; // сколько раз столкнулся снаряд
+        private float _currentLifeTime; // сколько сейчас осталось снаряду
+        private ushort _currentCollisions; // сколько раз столкнулся снаряд
 
-        private float _fadeStep;
         private bool _isFading = false;
 
         private Renderer _bulletRenderer;
 
         //Coroutine for smooth fade and hide object
-        private IEnumerator SmoothFade()
+        private IEnumerator SmoothFade(float currentLifeTime)
         {
-            for (float f = 1f; f >= 0; f -= _fadeStep)
+            var fadeStepTime = (_maxLifeTime - currentLifeTime) / _fadeStepsCount;
+
+            for (float f = 1f; f >= 0; f -= fadeStepTime)
             {
                 Color c = _bulletRenderer.material.color;
                 c.a = f > 0 ? f : 0;
                 _bulletRenderer.material.color = c;
 
-                if (f < _fadeStep)
+                if (f < fadeStepTime)
                 {
                     _isFading = false;
                     DestroyObject();
                     ResetBullet();
                 }
 
-                yield return new WaitForSeconds(_fadeStep);
+                yield return new WaitForSeconds(fadeStepTime);
             }
         }
 
         // Start is called before the first frame update
         protected void Start()
         {
-            _fadeStep = _bulletLifeTime * (1 - _percentOfLifeFade) / _fadeStepsCount;
             _bulletRenderer = GetComponentInChildren<Renderer>();
         }
 
 
         private void ResetBullet()
         {
-            _curBulletLifeTime = _bulletLifeTime;
-            _curCollisions = 0;
+            _currentLifeTime = _maxLifeTime;
+            _currentCollisions = 0;
 
             Color c = _bulletRenderer.material.color;
             c.a = 1f;
@@ -74,13 +74,13 @@ namespace Assets.Scripts
         // Update is called once per frame
         protected void Update()
         {
-            if (_curBulletLifeTime <= _bulletLifeTime * (1 - _percentOfLifeFade) && !_isFading)
+            if (_currentLifeTime <= _maxLifeTime * _percentOfLifeFade && !_isFading)
             {
                 _isFading = true;
-                StartCoroutine("SmoothFade", _bulletLifeTime * (1 - _percentOfLifeFade));
+                StartCoroutine(SmoothFade(_currentLifeTime - Time.deltaTime));
             }
 
-            _curBulletLifeTime -= Time.deltaTime;
+            _currentLifeTime -= Time.deltaTime;
         }
 
         protected void OnCollisionEnter(Collision collision)
@@ -91,20 +91,18 @@ namespace Assets.Scripts
                 {
                     DestroyObject();
                 }
-
-                ;
             }
         }
 
         protected void OnCollisionExit(Collision collision)
         {
-            if (_curCollisions >= _collisionsLife)
+            if (_currentCollisions >= _maxCollisions)
             {
                 DestroyObject();
             }
             else
             {
-                _curCollisions++;
+                _currentCollisions++;
             }
         }
 

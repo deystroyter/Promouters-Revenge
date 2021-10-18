@@ -10,6 +10,8 @@ namespace Assets.Scripts.Core.Damage
 {
     public class DamageableObject : MonoBehaviour, IDamageable
     {
+        private LevelManager _levelManager;
+
         public enum HitEffect
         {
             None,
@@ -19,13 +21,32 @@ namespace Assets.Scripts.Core.Damage
 
         [SerializeField] private HitEffect _hitEffect;
 
-        public int CurrHealth
+        public enum ObjectType
         {
-            get => _currHealth;
-            set => _currHealth = Mathf.Clamp(value, 0, _maxHealth);
+            Enemy,
+            TestCube
         }
 
-        [SerializeField] private int _currHealth = 0;
+        [SerializeField] public ObjectType ObjType;
+
+        public int Health
+        {
+            get => _health;
+            set
+            {
+                if (_isInvulnerable) return;
+
+                _health = Mathf.Clamp(value, 0, _maxHealth);
+
+                UpdateLocalUI();
+                if (!_isImmortal && Health == 0)
+                {
+                    Die();
+                }
+            }
+        }
+
+        [SerializeField] private int _health = 0;
 
         public int MaxHealth
         {
@@ -44,6 +65,7 @@ namespace Assets.Scripts.Core.Damage
 
         protected void Awake()
         {
+            _levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
             _hpBar = GetComponentInChildren<ProgressBar>();
         }
 
@@ -59,41 +81,30 @@ namespace Assets.Scripts.Core.Damage
 
         private void ResetDamageableObject()
         {
-            CurrHealth = MaxHealth;
-            //UpdateLocalUI(); //NullReference :(((
+            Health = MaxHealth;
         }
 
 
         public bool TakeHeal(Damage heal)
         {
-            CurrHealth += (int) Mathf.Round(heal.Amount * _healMultiplier);
-            UpdateLocalUI();
+            Health += (int) Mathf.Round(heal.Amount * _healMultiplier);
+
+
+            OnHealApplied?.Invoke(heal.Amount);
             return ApplyDamage(heal);
         }
 
         public bool TakeDamage(Damage dmg)
         {
             HitEffectLogic();
-            if (_isInvulnerable)
-            {
-                return ApplyDamage(dmg);
-            }
 
             var totalDmg = (int) Mathf.Round(dmg.Amount * _dmgMultiplier);
-            CurrHealth -= totalDmg;
-            UpdateLocalUI();
-            CheckHealth();
+            Health -= totalDmg;
+
 
             return ApplyDamage(dmg);
         }
 
-        private void CheckHealth()
-        {
-            if (CurrHealth == 0)
-            {
-                Die();
-            }
-        }
 
         private bool ApplyDamage(Damage dmg)
         {
@@ -109,6 +120,8 @@ namespace Assets.Scripts.Core.Damage
                 return;
             }
 
+            _levelManager.DamageableObjectDied(ObjType);
+
             Debug.Log($"{gameObject.name} died :(");
             gameObject.SetActive(false);
         }
@@ -120,6 +133,8 @@ namespace Assets.Scripts.Core.Damage
                 case HitEffect.None:
                     return;
                 case HitEffect.ScaleDown:
+                    transform.localScale = Vector3.one * 0.9f;
+
                     return;
                 case HitEffect.ScaleUp:
                     return;
@@ -129,15 +144,27 @@ namespace Assets.Scripts.Core.Damage
             }
         }
 
-        private void UpdateLocalUI()
+        private IEnumerable ScaleToNormal()
         {
-            _hpBar.ChangeValue((float) _currHealth / _maxHealth);
+            while (transform.localScale != Vector3.one)
+            {
+                transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one, 0.5f);
+            }
 
-            //Debug.LogWarning(_hpBar.BarValue + " - hp BAR || Curr= " + _currHealth / _maxHealth);
+            yield break;
         }
 
-        public event EventHandler OnHealApplied;
-        public event EventHandler OnDamageApplied;
-        public event EventHandler OnDied;
+
+        private void UpdateLocalUI()
+        {
+            _hpBar.ChangeValue((float) _health / _maxHealth);
+
+            //Debug.LogWarning(_hpBar.BarValue + " - hp BAR || Curr= " + _health / _maxHealth);
+        }
+
+        public delegate void HealthChange(int amount);
+
+        public event HealthChange OnHealApplied;
+        public event HealthChange OnDamageApplied;
     }
 }

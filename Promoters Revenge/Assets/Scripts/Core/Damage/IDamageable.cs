@@ -7,14 +7,10 @@ namespace Assets.Scripts.Core.Damage
 {
     public interface IDamageable
     {
-        public int CurrHealth { get; set; }
-        public int MaxHealth { get; set; }
+        public int Health { get; }
+        public int MaxHealth { get; }
 
         public bool TakeDamage(Damage dmg);
         public bool TakeHeal(Damage dmg);
-
-        public event EventHandler OnHealApplied;
-        public event EventHandler OnDamageApplied;
-        public event EventHandler OnDied;
     }
 }

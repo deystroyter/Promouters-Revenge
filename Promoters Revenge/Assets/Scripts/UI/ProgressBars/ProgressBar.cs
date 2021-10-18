@@ -29,7 +29,7 @@ namespace Assets.Scripts.UI.ProgressBars
         [Range(0.00f, 1f)] public float DelayUpdateTime = 0.5f;
 
 
-        private Image bar, barDelay, barBackground;
+        [SerializeField] private Image bar, barDelay, barBackground;
 
 
         private AudioSource _audiosource;
@@ -46,9 +46,9 @@ namespace Assets.Scripts.UI.ProgressBars
 
         private void Awake()
         {
-            bar = transform.Find("Bar").GetComponent<Image>();
-            barDelay = transform.Find("BarDelay").GetComponent<Image>();
-            barBackground = transform.Find("BarBackground").GetComponent<Image>();
+            //bar = transform.Find("Bar").GetComponent<Image>();
+            //barDelay = transform.Find("BarDelay").GetComponent<Image>();
+            //barBackground = transform.Find("BarBackground").GetComponent<Image>();
 
             //txtTitle = transform.Find("Text").GetComponent<Text>();
             _audiosource = GetComponent<AudioSource>();
