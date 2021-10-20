@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Assets.Scripts.Core.Damage;
 using UnityEngine;
@@ -8,8 +10,6 @@ namespace Assets.Scripts.Core.Collect
 {
     public class CollectibleObject : MonoBehaviour
     {
-        private LevelManager _levelManager;
-
         public enum ObjectType
         {
             RusMailBox,
@@ -39,11 +39,6 @@ namespace Assets.Scripts.Core.Collect
 
 
         // Start is called before the first frame update
-        protected void Start()
-        {
-            _levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
-        }
-
         // Update is called once per frame
         protected void Update()
         {
@@ -60,8 +55,7 @@ namespace Assets.Scripts.Core.Collect
                     transform.Rotate(new Vector3(0, 45, 0) * Time.deltaTime);
                     return;
                 default:
-                    Debug.LogError("IdleLogic_defaultSwitch");
-                    return;
+                    throw new InvalidEnumArgumentException($"IdleLogic(): IdleMove - {Idle.ToString()}");
             }
         }
 
@@ -76,12 +70,11 @@ namespace Assets.Scripts.Core.Collect
                 case CollectEffect.FlyUp:
                     return;
                 default:
-                    Debug.LogError("Illegal.");
-                    return;
+                    throw new InvalidEnumArgumentException($"OnCollectLogic(): _collectEffect - {_collectEffect.ToString()}");
             }
         }
 
-        void OnCollisionEnter(Collision collision)
+        protected void OnCollisionEnter(Collision collision)
         {
             if (collision.gameObject.tag == "Player")
             {
@@ -90,9 +83,9 @@ namespace Assets.Scripts.Core.Collect
             }
         }
 
-        void Die()
+        private void Die()
         {
-            _levelManager.CollectibleObjectDied(ObjType);
+            LevelInfo.Instance.CollectibleObjectDied(ObjType);
         }
     }
 }

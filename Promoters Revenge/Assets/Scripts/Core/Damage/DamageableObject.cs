@@ -10,8 +10,6 @@ namespace Assets.Scripts.Core.Damage
 {
     public class DamageableObject : MonoBehaviour, IDamageable
     {
-        private LevelManager _levelManager;
-
         public enum HitEffect
         {
             None,
@@ -55,6 +53,7 @@ namespace Assets.Scripts.Core.Damage
         }
 
         [SerializeField] private int _maxHealth = 1;
+
         [SerializeField] private float _dmgMultiplier = 1f;
         [SerializeField] private float _healMultiplier = 1f;
 
@@ -65,13 +64,7 @@ namespace Assets.Scripts.Core.Damage
 
         protected void Awake()
         {
-            _levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
             _hpBar = GetComponentInChildren<ProgressBar>();
-        }
-
-        protected void Start()
-        {
-            //Debug.LogWarning(_hpBar.BarValue + " wtf");
         }
 
         protected void OnEnable()
@@ -120,7 +113,7 @@ namespace Assets.Scripts.Core.Damage
                 return;
             }
 
-            _levelManager.DamageableObjectDied(ObjType);
+            LevelInfo.Instance.DamageableObjectDied(ObjType);
 
             Debug.Log($"{gameObject.name} died :(");
             gameObject.SetActive(false);
@@ -134,7 +127,6 @@ namespace Assets.Scripts.Core.Damage
                     return;
                 case HitEffect.ScaleDown:
                     transform.localScale = Vector3.one * 0.9f;
-
                     return;
                 case HitEffect.ScaleUp:
                     return;

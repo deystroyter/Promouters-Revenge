@@ -5,9 +5,10 @@ TagManager:
   serializedVersion: 2
   tags:
   - Roads
-  - LevelManager
   - Weapon
   - PauseMenu
+  - LevelInfo
+  - SceneManager
   layers:
   - Default
   - TransparentFX

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Assets.Scripts;
@@ -9,9 +10,7 @@ namespace Assets.Scripts.Core.Quest
 {
     public class GoalDefeat : MonoBehaviour, IGoal
     {
-        private LevelManager _levelManager;
-
-        public event IGoal.GoalCompleted OnComplete;
+        public event Action OnComplete;
 
         public string GoalDescription { get; private set; }
         public int CurrentAmount
@@ -30,17 +29,12 @@ namespace Assets.Scripts.Core.Quest
         [SerializeField] private int _requiredAmount;
         [SerializeField] public DamageableObject.ObjectType DmgObjTargetType;
 
-        // Start is called before the first frame update
-        void Start()
+        protected void Start()
         {
-            _levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
-            _levelManager.OnDamageableObjectDie += DamageableObjectDied_GoalDefeatHandler;
+            MakeDescription();
+            LevelInfo.Instance.OnDamageableObjectDie += DamageableObjectDied_GoalDefeatHandler;
         }
 
-        // Update is called once per frame
-        void Update()
-        {
-        }
 
         private void MakeDescription()
         {
@@ -61,7 +55,7 @@ namespace Assets.Scripts.Core.Quest
 
         private void DamageableObjectDied_GoalDefeatHandler(DamageableObject.ObjectType type)
         {
-            CurrentAmount = _levelManager.DamageableTypesCounter[type];
+            CurrentAmount = LevelInfo.Instance.DamageableTypesCounter[type];
         }
     }
 }

@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Assets.Scripts.UI.HUD;
 using UnityEngine;
 
 namespace Assets.Scripts.Weapon
@@ -8,8 +10,7 @@ namespace Assets.Scripts.Weapon
     [RequireComponent(typeof(AudioSource))]
     public class WeaponController : MonoBehaviour
     {
-        //public static Weapon _instance { get; private set; }
-
+        public Sprite WeaponIconSprite;
         [SerializeField] private ObjectPooler.ObjectInfo.ObjectType bulletType;
 
         public int AmmoAmount
@@ -47,30 +48,25 @@ namespace Assets.Scripts.Weapon
         private Transform gunpoint; //точка выстрела (дуло)
         private AudioSource audioSrc;
 
-        public delegate void AmmoChangeEvent(int ammoInMag, int ammoAmount);
-
-        public event AmmoChangeEvent OnAmmoChanged;
-
-        protected void Awake()
-        {
-            //_instance = this;
-        }
-
 
         protected void Start()
         {
             audioSrc = GetComponent<AudioSource>();
-            // LoadAudioClips();
             if (gunpoint == null)
             {
                 foreach (Transform child in gameObject.transform)
                 {
                     if (child.name == "gunpoint")
+                    {
                         gunpoint = child.transform;
+                    }
+                }
+
+                if (gunpoint == null)
+                {
+                    throw new Exception("No founded gunpoint in Weapon!");
                 }
             }
-
-            // OnAmmoChanged?.Invoke(_ammoInMag, _ammoAmount);
         }
 
         protected void Update()
@@ -81,10 +77,14 @@ namespace Assets.Scripts.Weapon
 
         private void ShootLogic()
         {
-            if (Input.GetMouseButton(0) & _ammoInMag > 0 & reloadTimer <= 0 & shootTimer <= 0)
+            if (Input.GetMouseButton(0) && _ammoInMag > 0 && reloadTimer <= 0 && shootTimer <= 0)
             {
                 GameObject bullet = ObjectPooler.ObjPooler.GetObject(bulletType);
-                if (bullet == null) return;
+                if (bullet == null)
+                {
+                    return;
+                }
+
                 bullet.GetComponent<Rigidbody>().velocity = Vector3.zero;
                 bullet.transform.position = gunpoint.position;
                 bullet.transform.rotation = gunpoint.rotation;
@@ -93,9 +93,9 @@ namespace Assets.Scripts.Weapon
 
                 PlayAudioOneTime(_fireAudioClip);
 
-                _ammoInMag = _ammoInMag - 1;
+                _ammoInMag--;
 
-                OnAmmoChanged?.Invoke(_ammoInMag, _ammoAmount);
+                HUDManager.Instance.UpdateGunAmmoInfo(AmmoInMag, AmmoAmount);
 
                 if (_ammoInMag == 0)
                 {
@@ -118,12 +118,18 @@ namespace Assets.Scripts.Weapon
 
                 PlayAudioOneTime(_reloadAudioClip);
 
-                OnAmmoChanged?.Invoke(_ammoInMag, _ammoAmount);
+                HUDManager.Instance.UpdateGunAmmoInfo(AmmoInMag, AmmoAmount);
 
-                if (shootTimer > 0) shootTimer -= Time.deltaTime;
+                if (shootTimer > 0)
+                {
+                    shootTimer -= Time.deltaTime;
+                }
             }
 
-            if (reloadTimer > 0) reloadTimer -= Time.deltaTime;
+            if (reloadTimer > 0)
+            {
+                reloadTimer -= Time.deltaTime;
+            }
         }
 
         private void PlayAudioOneTime(AudioClip clip)

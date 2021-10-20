@@ -2,36 +2,75 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml.Serialization;
+using Assets.Scripts.UI.HUD;
 using UnityEngine;
 
-public class GameManager : MonoBehaviour
+namespace Assets.Scripts
 {
-    private static GameManager _instance;
-
-
-    protected void Awake()
+    public class GameManager : MonoBehaviour
     {
-        MakeSingleton();
-    }
+        public static GameManager Instance;
 
-    protected void Start()
-    {
-    }
+        public GameObject PauseMenu;
+        public bool IsPaused = false;
 
-    protected void Update()
-    {
-    }
-
-    private void MakeSingleton()
-    {
-        if (_instance != null)
+        protected void Awake()
         {
-            Destroy(gameObject);
+            Instance = this;
         }
-        else
+
+        public void StartLevel()
         {
-            _instance = this;
-            DontDestroyOnLoad(gameObject);
+            HUDManager.Instance.gameObject.SetActive(true);
+        }
+
+        protected void Update()
+        {
+            GamePauseLogic();
+        }
+
+        public void OpenLevelExit(GameObject LevelExit)
+        {
+            LevelExit.SetActive(true);
+        }
+
+        public void ExitLevel()
+        {
+            SceneTransitionManager.Instance.SwitchToScene("MainMenu");
+        }
+
+        private void GamePauseLogic()
+        {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                if (IsPaused)
+                {
+                    ResumeGame();
+                }
+                else
+                {
+                    PauseGame();
+                }
+            }
+        }
+
+        public void ResumeGame()
+        {
+            IsPaused = false;
+            PauseMenu.SetActive(false);
+            Time.timeScale = 1f;
+        }
+
+        public void PauseGame()
+        {
+            IsPaused = true;
+            PauseMenu.SetActive(true);
+            Time.timeScale = 1e-4f;
+        }
+
+        protected void OnDestroy()
+        {
+            Instance = null;
         }
     }
 }

@@ -16,7 +16,7 @@ public class TargetFollow : MonoBehaviour
     private IEnumerator FollowWithDelay(float distance)
     {
         if (distance > 5) Follow();
-        yield return new WaitForSeconds(0.3f);
+        yield return new WaitForSeconds(1f);
     }
 
     // Update is called once per frame
@@ -31,7 +31,7 @@ public class TargetFollow : MonoBehaviour
     {
         //RE-CODE THIS
         this.transform.LookAt(_target);
-        transform.position = Vector3.Slerp(transform.position, transform.position + transform.forward * 0.1f, 0.2f);
+        transform.position = Vector3.Slerp(transform.position, transform.position + transform.forward * 0.1f, speed * Time.deltaTime);
     }
 
     private void Test()

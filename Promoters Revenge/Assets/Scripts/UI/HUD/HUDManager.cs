@@ -3,37 +3,58 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using Assets.Scripts.Weapon;
+using UnityEngine.UI;
 
 namespace Assets.Scripts.UI.HUD
 {
     public class HUDManager : MonoBehaviour
     {
+        public static HUDManager Instance;
         [SerializeField] private GameObject Player;
         [SerializeField] private GameObject _weapon;
 
+
         [SerializeField] private TextMeshProUGUI _ammoText;
+        [SerializeField] private Image _gunIconImage;
+        [SerializeField] private TextMeshProUGUI _gunNameText;
 
 
         [SerializeField] private GameObject HpInfoHUD;
         [SerializeField] private GameObject GoalsInfoHUD;
 
-        protected void Start()
+        protected void Awake()
         {
-            _weapon.GetComponent<WeaponController>().OnAmmoChanged += UpdateGunInfoHUD;
+            Instance = this;
         }
 
+        protected void Start()
+        {
+            gameObject.SetActive(false);
+        }
 
-        private void UpdateGunInfoHUD(int currAmmo, int ammoCount)
+        public void UpdateNewGunInfo(Sprite gunIcon, string gunName, int currAmmo, int ammoCount)
+        {
+            _gunIconImage.overrideSprite = gunIcon;
+            _gunNameText.text = gunName;
+            UpdateGunAmmoInfo(currAmmo, ammoCount);
+        }
+
+        public void UpdateGunAmmoInfo(int currAmmo, int ammoCount)
         {
             _ammoText.SetText($"{currAmmo}/{ammoCount}");
         }
 
-        private void UpdateGoalsInfoHUD()
+        public void UpdateGoalsInfoHUD()
         {
         }
 
-        private void UpdateHpInfoHUD()
+        public void UpdatePlayerHpInfoHUD()
         {
+        }
+
+        private void OnDestroy()
+        {
+            Instance = null;
         }
     }
 }
