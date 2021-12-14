@@ -22,10 +22,12 @@ namespace Assets.Scripts.Core.Damage
         public enum ObjectType
         {
             Enemy,
-            TestCube
+            TestCube,
+            Player
         }
 
         [SerializeField] public ObjectType ObjType;
+        [SerializeField] public GameObject HpCanvas;
 
         public int Health
         {
@@ -59,12 +61,35 @@ namespace Assets.Scripts.Core.Damage
 
         [SerializeField] private bool _isImmortal = false;
         [SerializeField] private bool _isInvulnerable = false;
-
-        private ProgressBar _hpBar;
+        private bool wasDamaged;
+        [SerializeField] private float TimeToHideHpCanvas = 5f;
+        private float _remainingActiveTime;
+        [SerializeField] private ProgressBar _hpBar;
 
         protected void Awake()
         {
-            _hpBar = GetComponentInChildren<ProgressBar>();
+            if (_hpBar == null)
+            {
+                _hpBar = GetComponentInChildren<ProgressBar>();
+            }
+        }
+
+        protected void Update()
+        {
+            if (ObjType == ObjectType.Player)
+            {
+                return;
+            }
+
+            if (wasDamaged && _remainingActiveTime < 0.01f)
+            {
+                HpCanvas.SetActive(false);
+                wasDamaged = false;
+            }
+            else if (wasDamaged)
+            {
+                _remainingActiveTime -= Time.deltaTime;
+            }
         }
 
         protected void OnEnable()
@@ -75,6 +100,12 @@ namespace Assets.Scripts.Core.Damage
         private void ResetDamageableObject()
         {
             Health = MaxHealth;
+            if (ObjType == ObjectType.Player)
+            {
+                return;
+            }
+
+            HpCanvas.SetActive(false);
         }
 
 
@@ -90,6 +121,7 @@ namespace Assets.Scripts.Core.Damage
         public bool TakeDamage(Damage dmg)
         {
             HitEffectLogic();
+
 
             var totalDmg = (int) Mathf.Round(dmg.Amount * _dmgMultiplier);
             Health -= totalDmg;
@@ -116,7 +148,10 @@ namespace Assets.Scripts.Core.Damage
             LevelInfo.Instance.DamageableObjectDied(ObjType);
 
             Debug.Log($"{gameObject.name} died :(");
-            gameObject.SetActive(false);
+            if (ObjType != ObjectType.Player)
+            {
+                gameObject.SetActive(false);
+            }
         }
 
         private void HitEffectLogic()
@@ -149,8 +184,11 @@ namespace Assets.Scripts.Core.Damage
 
         private void UpdateLocalUI()
         {
-            _hpBar.ChangeValue((float) _health / _maxHealth);
+            HpCanvas.SetActive(true);
+            _remainingActiveTime = TimeToHideHpCanvas;
+            wasDamaged = true;
 
+            _hpBar.ChangeValue((float) _health / _maxHealth);
             //Debug.LogWarning(_hpBar.BarValue + " - hp BAR || Curr= " + _health / _maxHealth);
         }
 

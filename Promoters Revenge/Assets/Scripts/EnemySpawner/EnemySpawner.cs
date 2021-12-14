@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace Assets.Scripts
 {
@@ -7,21 +8,32 @@ namespace Assets.Scripts
     {
         [SerializeField] private ObjectPooler.ObjectInfo.ObjectType enemyType;
 
+        [SerializeField] private float _minTimeBetweenSpawn = 0.5f;
         [SerializeField] private float _maxTimeBetweenSpawn = 2f;
+
+        private GameObject[] _spawnPoints;
 
         private IEnumerator RandomPeriodSpawn()
         {
-            Spawn(GetRandomPlace());
-            yield return new WaitForSeconds(Random.Range(0.5f, _maxTimeBetweenSpawn));
+            do
+            {
+                Spawn(GetRandomNavMeshSpawnPoint());
+                yield return new WaitForSeconds(Random.Range(_minTimeBetweenSpawn, _maxTimeBetweenSpawn));
+            } while (true);
+        }
+
+        protected void Start()
+        {
+            _spawnPoints = GameObject.FindGameObjectsWithTag("SpawnPoint");
+            StartEnemySpawner();
         }
 
         // Update is called once per frame
         protected void Update()
         {
-            SpawnLogic();
         }
 
-        private void SpawnLogic()
+        private void StartEnemySpawner()
         {
             StartCoroutine("RandomPeriodSpawn");
         }
@@ -43,12 +55,17 @@ namespace Assets.Scripts
             }
         }
 
-        private Vector3 GetRandomPlace()
+        private Vector3 GetRandomNavMeshSpawnPoint()
         {
-            Vector3 v3 = Vector3.zero;
-            v3.x = Random.Range(0f, 100.0f);
-            v3.z = Random.Range(0f, 100.0f);
-            return v3;
+            var rndSpawnPoint = _spawnPoints[Random.Range(0, _spawnPoints.Length)];
+            if (NavMesh.SamplePosition(rndSpawnPoint.transform.position, out var hit, 10.0f, NavMesh.AllAreas))
+            {
+                return hit.position;
+            }
+            else
+            {
+                throw new System.Exception($"Something wrong with SpawnPoint -- {rndSpawnPoint.name}");
+            }
         }
 
         public void StopEnemySpawner()

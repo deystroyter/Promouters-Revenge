@@ -214,6 +214,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5283127982518995759, guid: 78efc95ea1c24ed4daedac3ce329a7a7, type: 3}
+      propertyPath: m_SortingOrder
+      value: 1000
+      objectReference: {fileID: 0}
     - target: {fileID: 5688554195099727555, guid: 78efc95ea1c24ed4daedac3ce329a7a7, type: 3}
       propertyPath: m_Name
       value: SceneTransitionManager

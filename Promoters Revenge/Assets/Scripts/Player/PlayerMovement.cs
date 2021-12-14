@@ -15,8 +15,7 @@ namespace Assets.Scripts
 
         //public float MouseSensitivity = 4f;
 
-        [Header("Running")]
-        [SerializeField] private bool _canRun = true;
+        [Header("Running")] [SerializeField] private bool _canRun = true;
 
         [SerializeField] private Animator _anim;
         private float _animKoef = 0.5f;
@@ -38,6 +37,7 @@ namespace Assets.Scripts
                 }
             }
         }
+
         private bool _isRunning;
 
         [SerializeField] [Range(1, 20)] private float _runSpeed = 20;
@@ -65,6 +65,11 @@ namespace Assets.Scripts
 
         private void MovementLogic()
         {
+            if (transform.position.y < -10f)
+            {
+                transform.position = GameObject.FindGameObjectWithTag("PlayerSpawnPoint").transform.position;
+            }
+
             IsRunning = _canRun && Input.GetKey(_runningKey);
             var targetMovingSpeed = IsRunning ? _runSpeed : speed;
 
@@ -100,15 +105,14 @@ namespace Assets.Scripts
 
         private void TurnLogic()
         {
-            var mousePosition = Input.mousePosition;
-            var viewportPosition = new Vector2(mousePosition.x / Screen.width, mousePosition.y / Screen.height);
+            var viewportPosition = new Vector2(Input.mousePosition.x / Screen.width, Input.mousePosition.y / Screen.height);
             var ray = _camera.ViewportPointToRay(viewportPosition);
 
             if (Physics.Raycast(ray, out var hit) && hit.transform != transform)
             {
                 transform.LookAt(new Vector3(hit.point.x, transform.position.y, hit.point.z), Vector3.up);
 
-                Debug.DrawRay(ray.origin, ray.direction, Color.red, 2f);
+                //Debug.DrawRay(ray.origin, ray.direction, Color.red, 2f);
             }
         }
     }

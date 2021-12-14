@@ -9,6 +9,11 @@ TagManager:
   - PauseMenu
   - LevelInfo
   - SceneManager
+  - Enemy
+  - SpawnPoint
+  - ThrowingSystem
+  - LevelExit
+  - PlayerSpawnPoint
   layers:
   - Default
   - TransparentFX
@@ -16,10 +21,10 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
+  - Roads
+  - Buildings
+  - Terrain
+  - Barriers
   - 
   - 
   - 

@@ -9,22 +9,19 @@ namespace Assets.Scripts.UI.ProgressBars
     [ExecuteInEditMode]
     public class ProgressBar : MonoBehaviour
     {
-        [Header("Title Setting")]
-        public string Title;
+        [Header("Title Setting")] public string Title;
 
         public Color TitleColor;
         public Font TitleFont;
         public int TitleFontSize = 10;
 
-        [Header("Bar Setting")]
-        public Color BarColor;
+        [Header("Bar Setting")] public Color BarColor;
 
         public Color BarDelayColor;
         public Color BarBackGroundColor;
         public Sprite BarBackGroundSprite;
 
-        [Header("DelayedBar Settings")]
-        [Range(0.01f, 5f)] public float DelayTime = 1f;
+        [Header("DelayedBar Settings")] [Range(0.01f, 5f)] public float DelayTime = 1f;
 
         [Range(0.00f, 1f)] public float DelayUpdateTime = 0.5f;
 
@@ -66,7 +63,7 @@ namespace Assets.Scripts.UI.ProgressBars
             barBackground.color = BarBackGroundColor;
             barBackground.sprite = BarBackGroundSprite;
 
-            UpdateValue();
+            //UpdateValue();
         }
 
         public void ChangeValue(float val)
@@ -81,7 +78,7 @@ namespace Assets.Scripts.UI.ProgressBars
             bar.fillAmount = Mathf.Lerp(bar.fillAmount, BarValue, 100 * Time.deltaTime);
             //txtTitle.text = Title + " " + val + "%";
 
-            StartCoroutine("DelayedUpdateValue");
+            StartCoroutine(DelayedUpdateValue());
         }
 
         private IEnumerator DelayedUpdateValue()

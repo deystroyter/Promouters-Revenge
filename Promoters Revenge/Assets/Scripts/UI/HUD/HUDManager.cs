@@ -10,9 +10,6 @@ namespace Assets.Scripts.UI.HUD
     public class HUDManager : MonoBehaviour
     {
         public static HUDManager Instance;
-        [SerializeField] private GameObject Player;
-        [SerializeField] private GameObject _weapon;
-
 
         [SerializeField] private TextMeshProUGUI _ammoText;
         [SerializeField] private Image _gunIconImage;
@@ -25,11 +22,6 @@ namespace Assets.Scripts.UI.HUD
         protected void Awake()
         {
             Instance = this;
-        }
-
-        protected void Start()
-        {
-            gameObject.SetActive(false);
         }
 
         public void UpdateNewGunInfo(Sprite gunIcon, string gunName, int currAmmo, int ammoCount)

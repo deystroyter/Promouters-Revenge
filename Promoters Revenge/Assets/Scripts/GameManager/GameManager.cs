@@ -11,17 +11,33 @@ namespace Assets.Scripts
     {
         public static GameManager Instance;
 
-        public GameObject PauseMenu;
+        public UIRoot UIRoot;
         public bool IsPaused = false;
+        public GameObject LevelExit;
+
+        public GameObject Player;
+        public GameObject PlayerSpawnPoint;
 
         protected void Awake()
         {
             Instance = this;
         }
 
+        protected void Start()
+        {
+            LevelExit = GameObject.FindGameObjectWithTag("LevelExit");
+            LevelExit.SetActive(false);
+        }
+
         public void StartLevel()
         {
-            HUDManager.Instance.gameObject.SetActive(true);
+            UIRoot.OnLevelStart();
+            PlayerSpawnPoint = GameObject.FindGameObjectWithTag("PlayerSpawnPoint");
+            Player.TryGetComponent<Rigidbody>(out var playerRigidbody);
+            playerRigidbody.useGravity = false;
+            Player.transform.position = PlayerSpawnPoint.transform.position;
+            Player.transform.rotation = PlayerSpawnPoint.transform.rotation;
+            playerRigidbody.useGravity = true;
         }
 
         protected void Update()
@@ -29,7 +45,7 @@ namespace Assets.Scripts
             GamePauseLogic();
         }
 
-        public void OpenLevelExit(GameObject LevelExit)
+        public void OpenLevelExit()
         {
             LevelExit.SetActive(true);
         }
@@ -57,14 +73,14 @@ namespace Assets.Scripts
         public void ResumeGame()
         {
             IsPaused = false;
-            PauseMenu.SetActive(false);
+            UIRoot.HidePauseMenu();
             Time.timeScale = 1f;
         }
 
         public void PauseGame()
         {
             IsPaused = true;
-            PauseMenu.SetActive(true);
+            UIRoot.ShowPauseMenu();
             Time.timeScale = 1e-4f;
         }
 

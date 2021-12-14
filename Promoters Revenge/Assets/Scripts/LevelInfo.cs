@@ -15,18 +15,22 @@ namespace Assets.Scripts
         public GameObject LevelExit;
 
         public Dictionary<DamageableObject.ObjectType, int> DamageableTypesCounter = new Dictionary<DamageableObject.ObjectType, int>();
+
         public delegate void DamageableObjectDieEvent(DamageableObject.ObjectType dmgObjType);
+
         public event DamageableObjectDieEvent OnDamageableObjectDie;
 
         public Dictionary<CollectibleObject.ObjectType, int> CollectibleTypesCounter = new Dictionary<CollectibleObject.ObjectType, int>();
+
         public delegate void CollectibleObjectDieEvent(CollectibleObject.ObjectType collectObjType);
+
         public event CollectibleObjectDieEvent OnCollectibleObjectDie;
 
 
         protected void Awake()
         {
             Instance = this;
-            LevelExit.SetActive(false);
+            //LevelExit.SetActive(false);
         }
 
         protected void Update()

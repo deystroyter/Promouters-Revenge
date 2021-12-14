@@ -5,12 +5,15 @@ using System.ComponentModel;
 using UnityEngine;
 using Assets.Scripts;
 using Assets.Scripts.Core.Collect;
+using Assets.Scripts.UI;
 
 namespace Assets.Scripts.Core.Quest
 {
     public class GoalCollect : MonoBehaviour, IGoal
     {
         public event Action OnComplete;
+        public event Action<int> OnProgressChanged;
+        public Sprite GoalIcon;
 
         public string GoalDescription { get; private set; }
 
@@ -25,10 +28,18 @@ namespace Assets.Scripts.Core.Quest
                 if (_currentAmount >= _requiredAmount)
                 {
                     OnComplete?.Invoke();
+                    GameManager.Instance.OpenLevelExit();
                 }
             }
         }
+
         private int _currentAmount;
+
+        public int RequiredAmount
+        {
+            get => _requiredAmount;
+        }
+
         [SerializeField] private int _requiredAmount;
 
         protected void Awake()
@@ -41,23 +52,25 @@ namespace Assets.Scripts.Core.Quest
         protected void Start()
         {
             LevelInfo.Instance.OnCollectibleObjectDie += CollectibleObjectDied_GoalCollectHandler;
+            UI_QuestInfoController.Instance.InitGoal(this);
         }
 
         private void CollectibleObjectDied_GoalCollectHandler(CollectibleObject.ObjectType type)
         {
             CurrentAmount = LevelInfo.Instance.CollectibleTypesCounter[type];
+            OnProgressChanged?.Invoke(CurrentAmount);
         }
 
         private void MakeDescription()
         {
-            GoalDescription += $"Соберите {_requiredAmount} ";
+            GoalDescription += $"Collect {_requiredAmount} ";
             switch (CollectObjTargetType)
             {
                 case CollectibleObject.ObjectType.RusMailBox:
-                    GoalDescription += $"потерянных посылок Почты Росси.";
+                    GoalDescription += $"lost Russian Post packages.";
                     break;
                 case CollectibleObject.ObjectType.AmazMailBox:
-                    GoalDescription += $"интернет-посылок.";
+                    GoalDescription += $"Amazon packages.";
                     break;
                 default:
                     throw new InvalidEnumArgumentException($"MakeDescription(): CollectObjTargetType - {CollectObjTargetType.ToString()}");
